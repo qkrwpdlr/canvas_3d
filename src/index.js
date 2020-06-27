@@ -1,1 +1,3 @@
-console.log("init")
+(async ()=>{
+    await console.log(123)
+})()

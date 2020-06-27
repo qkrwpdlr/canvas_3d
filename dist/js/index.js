@@ -93,7 +93,9 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-console.log("init")
+(async ()=>{
+    await console.log(123)
+})()
 
 /***/ })
 

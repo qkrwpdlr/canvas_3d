@@ -19,7 +19,7 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env'],
+                        presets: ["@babel/preset-es2017"],
                         plugins: ['@babel/plugin-proposal-class-properties']
                     }
                 }
