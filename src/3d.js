@@ -73,20 +73,6 @@ export class Cube extends Obj {
         this.obj.position.x = x
         this.obj.position.y = y
         this.obj.position.z = z
-        // window.addEventListener("keydown", (e) => {
-        //     if (e.key === "a") {
-        //         this.obj.rotation.y -= 0.01
-        //     }
-        //     else if (e.key === "s") {
-        //         this.obj.rotation.x -= 0.01
-        //     }
-        //     else if (e.key === "d") {
-        //         this.obj.rotation.y += 0.01
-        //     }
-        //     else if (e.key === "w") {
-        //         this.obj.rotation.x += 0.01
-        //     }
-        // })
     }
     rotateAnimation() {
         this.obj.rotation.x -= 0.01
