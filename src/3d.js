@@ -2,6 +2,7 @@ import * as THREE from "three/build/three.module"
 
 export default class {
     constructor(width, height) {
+        console.log("init")
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer();
