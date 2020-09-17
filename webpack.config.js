@@ -13,13 +13,13 @@ module.exports = {
             {
                 test: /\.js$/,
                 include: [
-                    path.resolve(__dirname, 'src/js')
+                    path.resolve(__dirname, 'src')
                 ],
                 exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
+                    loader: "babel-loader",
                     options: {
-                        presets: ["@babel/preset-es2017"],
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ['@babel/plugin-proposal-class-properties']
                     }
                 }

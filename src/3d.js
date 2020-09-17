@@ -2,14 +2,15 @@ import * as THREE from "three/build/three.module"
 
 export default class {
     constructor(width, height) {
-        console.log("init")
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer();
-
+        this.index = 0
         this.objs = []
-        var light = new THREE.PointLight(0xFFFFFF, 1, 500)
-        light.position.set(10, 0, 25)
+        var light = new THREE.PointLight(0xFFFFFF, 5, 10)
+        light.position.set(0, 0, 2)
+        // var light = new THREE.AmbientLight( 0xff00ff ); // soft white light
+        this.targetObj = null
         this.scene.add(light)
 
         this.renderer.setSize(width, height);
@@ -42,11 +43,22 @@ export default class {
                 this.camera.position.z -= 0.5
             }
         })
+        const keyPress = (e) => {
+            if (e.code === "KeyA") {
+                if (this.index >= (this.objs.length - 1)) this.index = 0
+                else this.index += 1
+                console.log(this.index)
+                this.targetObj = this.objs[this.index]
+            }
+        }
+        document.addEventListener("keypress", keyPress)
+
     }
     getDomElement() {
         return this.renderer.domElement
     }
     add(obj) {
+        if (this.targetObj === null) this.targetObj = obj
         this.scene.add(obj.obj);
         this.objs.push(obj)
     }
@@ -54,32 +66,47 @@ export default class {
         for (let obj of this.objs) {
             obj.render()
         }
+        if (this.targetObj !== null) {
+            this.camera.position.x = this.targetObj.obj.position.x
+            this.camera.position.y = this.targetObj.obj.position.y
+        }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => this.render())
     }
-
 }
 export class Obj {
-    constructor() {
-    }
+    constructor() { }
     render() { }
-
 }
-export class Cube extends Obj {
-    constructor(x = 0, y = 0, z = 0) {
-        super(x, y)
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+export class Planet extends Obj {
+    constructor({ distance, speed }) {
+        super()
+        const geometry = new THREE.SphereGeometry(0.5, 5, 5);
+        const material = new THREE.MeshLambertMaterial({ color: 0xff00ff });
         this.obj = new THREE.Mesh(geometry, material);
-        this.obj.position.x = x
-        this.obj.position.y = y
-        this.obj.position.z = z
+        this.obj.position.z = 0
+        this.obj.position.x = 0
+        this.obj.position.y = 0
+        this.time = 0
+        this.speed = speed
+        this.distance = distance
     }
     rotateAnimation() {
+        this.obj.position.x = this.distance * Math.sin(this.time)
+        this.obj.position.y = this.distance * Math.cos(this.time)
+        this.time += this.speed
         this.obj.rotation.x -= 0.01
         this.obj.rotation.y -= 0.01
     }
     render() {
         this.rotateAnimation()
     }
+}
+
+export class Sun extends Planet {
+    constructor() {
+        super({ distance: 0, speed: 0 })
+        this.obj.material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+    }
+
 }
