@@ -52106,13 +52106,14 @@ if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 /*!*******************!*\
   !*** ./src/3d.js ***!
   \*******************/
-/*! exports provided: default, Obj, Cube */
+/*! exports provided: default, Obj, Planet, Sun */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Obj", function() { return Obj; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Cube", function() { return Cube; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Planet", function() { return Planet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Sun", function() { return Sun; });
 /* harmony import */ var three_build_three_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/build/three.module */ "./node_modules/three/build/three.module.js");
 
 
@@ -52121,10 +52122,12 @@ __webpack_require__.r(__webpack_exports__);
         this.scene = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Scene"]();
         this.camera = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PerspectiveCamera"](75, width / height, 0.1, 1000);
         this.renderer = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["WebGLRenderer"]();
-
+        this.index = 0
         this.objs = []
-        var light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xFFFFFF, 1, 500)
-        light.position.set(10, 0, 25)
+        var light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xFFFFFF, 5, 10)
+        light.position.set(0, 0, 2)
+        // var light = new THREE.AmbientLight( 0xff00ff ); // soft white light
+        this.targetObj = null
         this.scene.add(light)
 
         this.renderer.setSize(width, height);
@@ -52157,11 +52160,22 @@ __webpack_require__.r(__webpack_exports__);
                 this.camera.position.z -= 0.5
             }
         })
+        const keyPress = (e) => {
+            if (e.code === "KeyA") {
+                if (this.index >= (this.objs.length - 1)) this.index = 0
+                else this.index += 1
+                console.log(this.index)
+                this.targetObj = this.objs[this.index]
+            }
+        }
+        document.addEventListener("keypress", keyPress)
+
     }
     getDomElement() {
         return this.renderer.domElement
     }
     add(obj) {
+        if (this.targetObj === null) this.targetObj = obj
         this.scene.add(obj.obj);
         this.objs.push(obj)
     }
@@ -52169,34 +52183,49 @@ __webpack_require__.r(__webpack_exports__);
         for (let obj of this.objs) {
             obj.render()
         }
+        if (this.targetObj !== null) {
+            this.camera.position.x = this.targetObj.obj.position.x
+            this.camera.position.y = this.targetObj.obj.position.y
+        }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => this.render())
     }
-
 });
 class Obj {
-    constructor() {
-    }
+    constructor() { }
     render() { }
-
 }
-class Cube extends Obj {
-    constructor(x = 0, y = 0, z = 0) {
-        super(x, y)
-        const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["BoxGeometry"]();
-        const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xffff00 });
+class Planet extends Obj {
+    constructor({ distance, speed }) {
+        super()
+        const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](0.5, 5, 5);
+        const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xff00ff });
         this.obj = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Mesh"](geometry, material);
-        this.obj.position.x = x
-        this.obj.position.y = y
-        this.obj.position.z = z
+        this.obj.position.z = 0
+        this.obj.position.x = 0
+        this.obj.position.y = 0
+        this.time = 0
+        this.speed = speed
+        this.distance = distance
     }
     rotateAnimation() {
+        this.obj.position.x = this.distance * Math.sin(this.time)
+        this.obj.position.y = this.distance * Math.cos(this.time)
+        this.time += this.speed
         this.obj.rotation.x -= 0.01
         this.obj.rotation.y -= 0.01
     }
     render() {
         this.rotateAnimation()
     }
+}
+
+class Sun extends Planet {
+    constructor() {
+        super({ distance: 0, speed: 0 })
+        this.obj.material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xff0000 });
+    }
+
 }
 
 
@@ -52213,17 +52242,24 @@ class Cube extends Obj {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3d.js */ "./src/3d.js");
 
+// import ReactDOM from "react-dom"
+// import { MainComponent } from "./component/index.js"
 
 const main = () => {
     var canvas = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["default"](window.innerWidth, window.innerHeight)
 
-    document.body.appendChild(canvas.getDomElement());
+    // const root = document.getElementById("root")
+    // ReactDOM.render(<MainComponent />, root)
 
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Cube"](0, 4, 4));
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Cube"](4, 4, 0));
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Cube"](4, 4, 0));
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Cube"](4, 4, 4));
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Cube"](0, 0, 0));
+    document.createElement("div")
+    document.body.appendChild(canvas.getDomElement());
+    const planets = [
+        { distance: 3, speed: Math.random() % 0.01 },
+        { distance: 6, speed: Math.random() % 0.01 },
+        { distance: 9, speed: Math.random() % 0.01 },
+    ]
+    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Sun"]());
+    for (let planet of planets) canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Planet"](planet))
 }
 
 window.onload = main
