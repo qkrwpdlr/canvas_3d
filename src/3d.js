@@ -12,9 +12,9 @@ export default class {
         // var light = new THREE.AmbientLight( 0xff00ff ); // soft white light
         this.targetObj = null
         this.scene.add(light)
-
         this.renderer.setSize(width, height);
         this.camera.position.z = 20
+        this.cameraZ = this.camera.position.z
         this._mouseEvent()
         this._keyEvent()
         this.render()
@@ -36,11 +36,10 @@ export default class {
     }
     _keyEvent() {
         document.addEventListener("keypress", (e) => {
-            console.log(this.camera.position.z)
-            if (e.code === "KeyZ") {
-                this.camera.position.z += 0.5
-            } else if (e.code === "KeyX") {
-                this.camera.position.z -= 0.5
+            if (e.code === "KeyZ" && this.cameraZ <= 100) {
+                this.cameraZ += 5
+            } else if (e.code === "KeyX" && this.cameraZ > 5) {
+                this.cameraZ -= 5
             }
         })
         const keyPress = (e) => {
@@ -66,7 +65,7 @@ export default class {
             obj.render()
         }
         if (this.targetObj !== null) {
-            const offset = new THREE.Vector3(this.targetObj.obj.position.x, this.targetObj.obj.position.y, this.camera.position.z);
+            const offset = new THREE.Vector3(this.targetObj.obj.position.x, this.targetObj.obj.position.y, this.cameraZ);
             this.camera.position.lerp(offset, 0.1);
         }
         this.renderer.render(this.scene, this.camera);
