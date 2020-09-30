@@ -14,7 +14,7 @@ export default class {
         this.scene.add(light)
 
         this.renderer.setSize(width, height);
-        this.camera.position.z = 10
+        this.camera.position.z = 20
         this._mouseEvent()
         this._keyEvent()
         this.render()
@@ -47,7 +47,6 @@ export default class {
             if (e.code === "KeyA") {
                 if (this.index >= (this.objs.length - 1)) this.index = 0
                 else this.index += 1
-                console.log(this.index)
                 this.targetObj = this.objs[this.index]
             }
         }
@@ -67,8 +66,8 @@ export default class {
             obj.render()
         }
         if (this.targetObj !== null) {
-            this.camera.position.x = this.targetObj.obj.position.x
-            this.camera.position.y = this.targetObj.obj.position.y
+            const offset = new THREE.Vector3(this.targetObj.obj.position.x, this.targetObj.obj.position.y, this.camera.position.z);
+            this.camera.position.lerp(offset, 0.1);
         }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => this.render())
