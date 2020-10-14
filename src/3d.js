@@ -148,7 +148,7 @@ export class Planet extends Obj {
     const geometry = new THREE.SphereGeometry(0.5, 100, 100);
     const loader = new THREE.TextureLoader();
     const material = new THREE.MeshLambertMaterial({
-      map: loader.load("./../assets/earth.jpg"),
+      map: loader.load("./assets/earth.jpg"),
     });
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.z = 0;
