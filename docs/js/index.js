@@ -52106,127 +52106,300 @@ if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 /*!*******************!*\
   !*** ./src/3d.js ***!
   \*******************/
-/*! exports provided: default, Obj, Planet, Sun */
+/*! exports provided: SolarSystem, Obj, Planet, Sun */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SolarSystem", function() { return SolarSystem; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Obj", function() { return Obj; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Planet", function() { return Planet; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Sun", function() { return Sun; });
 /* harmony import */ var three_build_three_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/build/three.module */ "./node_modules/three/build/three.module.js");
 
 
-/* harmony default export */ __webpack_exports__["default"] = (class {
-    constructor(width, height) {
-        this.scene = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Scene"]();
-        this.camera = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PerspectiveCamera"](75, width / height, 0.1, 1000);
-        this.renderer = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["WebGLRenderer"]();
-        this.index = 0
-        this.objs = []
-        var light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xFFFFFF, 5, 10)
-        light.position.set(0, 0, 2)
-        // var light = new THREE.AmbientLight( 0xff00ff ); // soft white light
-        this.targetObj = null
-        this.scene.add(light)
+class SolarSystem {
+  constructor(width, height) {
+    this._init(width, height);
+    this._test();
+    this._setBackground();
+    this._setSize();
+    this.render();
+    this._activeObjectIndex = 0;
+    this._mouseEvent();
+    this._keyEvent();
+    this.camera.position.x = 0;
+    this.camera.position.y = 29;
+    this.camera.position.z = 20;
+    this.camera.up.set(0, 0, 1);
+    this.camera.lookAt(0, 9, 0);
+  }
+  _init(width, height) {
+    this.scene = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Scene"]();
+    this.camera = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PerspectiveCamera"](75, width / height, 0.1, 1000);
+    this.renderer = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["WebGLRenderer"]();
+    this.renderer.setSize(width, height);
+    this.objs = [];
+    this.distance = 7;
+  }
+  _setBackground() {
+    const backlight = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["AmbientLight"](0x404040); // soft white light
+    this.scene.add(backlight);
+    const light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xffffff, 5, 100);
+    light.position.set(0, 0, 0);
+    this.scene.add(light);
+    const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Geometry"]();
 
-        this.renderer.setSize(width, height);
-        this.camera.position.z = 10
-        this._mouseEvent()
-        this._keyEvent()
-        this.render()
-    }
-    _mouseEvent() {
-        const mouseDown = () => {
-            document.addEventListener("mousemove", mouseMove)
-        }
-        const mouseUp = () => {
-            document.removeEventListener("mouseup", mouseUp)
-            document.removeEventListener("mousemove", mouseMove)
-        }
-        const mouseMove = (e) => {
-            this.camera.position.x -= e.movementX / 40
-            this.camera.position.y += e.movementY / 40
-            document.addEventListener("mouseup", mouseUp)
-        }
-        document.addEventListener("mousedown", mouseDown)
-    }
-    _keyEvent() {
-        document.addEventListener("keypress", (e) => {
-            console.log(this.camera.position.z)
-            if (e.code === "KeyZ") {
-                this.camera.position.z += 0.5
-            } else if (e.code === "KeyX") {
-                this.camera.position.z -= 0.5
-            }
-        })
-        const keyPress = (e) => {
-            if (e.code === "KeyA") {
-                if (this.index >= (this.objs.length - 1)) this.index = 0
-                else this.index += 1
-                console.log(this.index)
-                this.targetObj = this.objs[this.index]
-            }
-        }
-        document.addEventListener("keypress", keyPress)
+    for (let i = 0; i < 100000; i++) {
+      const star = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Vector3"]();
+      star.x = three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Math"].randFloatSpread(2000);
+      star.y = three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Math"].randFloatSpread(2000);
+      star.z = three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Math"].randFloatSpread(2000);
 
+      geometry.vertices.push(star);
     }
-    getDomElement() {
-        return this.renderer.domElement
+
+    const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointsMaterial"]({
+      color: 0xffffff,
+    });
+    const starField = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Points"](geometry, material);
+    this.scene.add(starField);
+  }
+  _setSize() {
+    window.addEventListener("resize", () => {
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  }
+  _test() {
+    this.t = 0;
+    this.camera.useQuaternion = true;
+    this.startQuaternion = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Quaternion"]().set(0, 0, 0, 1).normalize();
+    this.endQuaternion = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Quaternion"]().set(0, 0, 0, 1).normalize();
+  }
+  _testRender() {
+    // const distance = 20;
+    // const target = 9;
+    // this.camera.position.set(
+    //   Math.sin(this.t) * distance,
+    //   target + Math.cos(this.t) * distance,
+    //   10
+    // );
+    // this.t += 0.01;
+  }
+  _keyEvent() {
+    const keyPress = (e) => {
+      if (e.code === "KeyA") {
+        this._activeObjectIndex =
+          (this._activeObjectIndex + 1) % this.objs.length;
+        const { x, y } = this.objs[this._activeObjectIndex].obj.position;
+        this.camera.up.set(0, 0, 1);
+        this.camera.lookAt(x, y, 0);
+      }
+    };
+    document.addEventListener("keypress", keyPress);
+  }
+  _mouseEvent() {
+    const { distance } = this;
+
+    const mouseDown = () => {
+      document.addEventListener("mousemove", mouseMove);
+    };
+    const mouseUp = () => {
+      document.removeEventListener("mouseup", mouseUp);
+      document.removeEventListener("mousemove", mouseMove);
+    };
+    const mouseMove = (e) => {
+      this.t += e.movementX / 60;
+      const { x, y } = this.objs[this._activeObjectIndex].obj.position;
+
+      this.camera.position.set(
+        x + Math.sin(this.t) * distance,
+        y + Math.cos(this.t) * distance,
+        3
+      );
+      this.camera.up.set(0, 0, 1);
+      this.camera.lookAt(x, y, 0);
+
+      document.addEventListener("mouseup", mouseUp);
+    };
+    document.addEventListener("mousedown", mouseDown);
+  }
+  get domElement() {
+    return this.renderer.domElement;
+  }
+  add(obj) {
+    if (this.targetObj === null) this.targetObj = obj;
+    this.scene.add(obj.obj);
+    this.objs.push(obj);
+  }
+  render() {
+    for (let obj of this.objs) {
+      obj.render();
     }
-    add(obj) {
-        if (this.targetObj === null) this.targetObj = obj
-        this.scene.add(obj.obj);
-        this.objs.push(obj)
+    if (this.objs.length > 0) {
+      const { distance } = this;
+      const { x, y } = this.objs[this._activeObjectIndex].obj.position;
+      this.camera.position.set(
+        x + Math.sin(this.t) * distance,
+        y + Math.cos(this.t) * distance,
+        3
+      );
+
+      this.camera.up.set(0, 0, 1);
+      this.camera.lookAt(x, y, 0);
     }
-    render() {
-        for (let obj of this.objs) {
-            obj.render()
-        }
-        if (this.targetObj !== null) {
-            this.camera.position.x = this.targetObj.obj.position.x
-            this.camera.position.y = this.targetObj.obj.position.y
-        }
-        this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(() => this.render())
-    }
-});
+
+    this._testRender();
+    this.renderer.render(this.scene, this.camera);
+    requestAnimationFrame(() => this.render());
+  }
+}
 class Obj {
-    constructor() { }
-    render() { }
+  constructor() {}
+  render() {}
 }
 class Planet extends Obj {
-    constructor({ distance, speed }) {
-        super()
-        const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](0.5, 5, 5);
-        const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xff00ff });
-        this.obj = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Mesh"](geometry, material);
-        this.obj.position.z = 0
-        this.obj.position.x = 0
-        this.obj.position.y = 0
-        this.time = 0
-        this.speed = speed
-        this.distance = distance
-    }
-    rotateAnimation() {
-        this.obj.position.x = this.distance * Math.sin(this.time)
-        this.obj.position.y = this.distance * Math.cos(this.time)
-        this.time += this.speed
-        this.obj.rotation.x -= 0.01
-        this.obj.rotation.y -= 0.01
-    }
-    render() {
-        this.rotateAnimation()
-    }
+  constructor({ distance, speed }) {
+    super();
+    const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](0.5, 100, 100);
+    const loader = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["TextureLoader"]();
+    const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({
+      map: loader.load("./../assets/earth.jpg"),
+    });
+    this.obj = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Mesh"](geometry, material);
+    this.obj.position.z = 0;
+    this.obj.position.x = 0;
+    this.obj.position.y = 0;
+    this.time = 0;
+    this.speed = speed;
+    this.distance = distance;
+  }
+  rotateAnimation() {
+    this.obj.position.x = this.distance * Math.sin(this.time);
+    this.obj.position.y = this.distance * Math.cos(this.time);
+    this.time += this.speed;
+    this.obj.rotation.z -= 0.03;
+    // this.obj.rotation.y -= 0.01;
+  }
+  render() {
+    this.rotateAnimation();
+  }
 }
 
-class Sun extends Planet {
-    constructor() {
-        super({ distance: 0, speed: 0 })
-        this.obj.material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xff0000 });
-    }
-
+class Sun extends Obj {
+  constructor() {
+    super({ distance: 0, speed: 0 });
+    this.obj.material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({ color: 0xff0000 });
+  }
 }
+
+
+/***/ }),
+
+/***/ "./src/data/dummy.js":
+/*!***************************!*\
+  !*** ./src/data/dummy.js ***!
+  \***************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ([
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 1,
+    radius: 1,
+  },
+  {
+    orbitalSpeed: 0.2,
+    rotationSpeed: 1,
+    distance: 2,
+    radius: 1,
+  },
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 3,
+    radius: 1,
+  },
+ ]);
+
+
+/***/ }),
+
+/***/ "./src/data/index.js":
+/*!***************************!*\
+  !*** ./src/data/index.js ***!
+  \***************************/
+/*! exports provided: datas */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "datas", function() { return datas; });
+/* harmony import */ var _model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./model */ "./src/data/model.js");
+/* harmony import */ var _dummy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dummy */ "./src/data/dummy.js");
+
+
+const initData = () => {
+  const temp = [];
+  for (let dummy of _dummy__WEBPACK_IMPORTED_MODULE_1__["default"])
+    temp.push(
+      new _model__WEBPACK_IMPORTED_MODULE_0__["Planet"](
+        dummy.orbitalSpeed,
+        dummy.rotationSpeed,
+        dummy.distance,
+        dummy.radius
+      )
+    );
+  return temp;
+};
+
+const datas = initData();
+
+
+/***/ }),
+
+/***/ "./src/data/model.js":
+/*!***************************!*\
+  !*** ./src/data/model.js ***!
+  \***************************/
+/*! exports provided: Planet */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Planet", function() { return Planet; });
+class Planet {
+  constructor(
+    //공전속도
+    orbitalSpeed,
+    //자전속도
+    rotationSpeed,
+    // 태양과의 거리
+    distance,
+    // 행성의 지름
+    radius
+  ) {
+    this.orbitalSpeed = orbitalSpeed;
+    this.rotationSpeed = rotationSpeed;
+    this.distance = distance;
+    this.radius = radius;
+    this.id = uuidv4();
+  }
+}
+
+const uuidv4 = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 
 /***/ }),
@@ -52241,28 +52414,22 @@ class Sun extends Planet {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3d.js */ "./src/3d.js");
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./data */ "./src/data/index.js");
 
-// import ReactDOM from "react-dom"
-// import { MainComponent } from "./component/index.js"
 
 const main = () => {
-    var canvas = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["default"](window.innerWidth, window.innerHeight)
+  const system = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["SolarSystem"](window.innerWidth, window.innerHeight);
+  document.body.appendChild(system.domElement);
+  for (let data of _data__WEBPACK_IMPORTED_MODULE_1__["datas"]) {
+    const obj = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Planet"]({
+      distance: data.distance * 3,
+      speed: data.orbitalSpeed * 0.05,
+    });
+    system.add(obj);
+  }
+};
+window.onload = main;
 
-    // const root = document.getElementById("root")
-    // ReactDOM.render(<MainComponent />, root)
-
-    document.createElement("div")
-    document.body.appendChild(canvas.getDomElement());
-    const planets = [
-        { distance: 3, speed: Math.random() % 0.01 },
-        { distance: 6, speed: Math.random() % 0.01 },
-        { distance: 9, speed: Math.random() % 0.01 },
-    ]
-    canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Sun"]());
-    for (let planet of planets) canvas.add(new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Planet"](planet))
-}
-
-window.onload = main
 
 /***/ })
 
