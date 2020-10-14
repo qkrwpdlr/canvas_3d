@@ -14,15 +14,20 @@
         #root{
             z-index: 1001;
             width: 300px;
-            height: 100vh;
+            height: calc(100vh - 40px);
             background-color: rgba(0, 0, 0, 0.584);
             position: absolute;
+            margin: 20px;
+            user-select: none;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <div id="root"></div>
+    <div id="root">
+        여기에 추가적인 행성 content가 나올예정
+    </div>
     <script src="js/index.js"></script>
 </body>
 

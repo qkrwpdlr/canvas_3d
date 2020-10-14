@@ -2,6 +2,7 @@ import * as THREE from "three/build/three.module";
 
 export class SolarSystem {
   constructor(width, height) {
+    this.timer = null;
     this._init(width, height);
     this._test();
     this._setBackground();
@@ -37,7 +38,6 @@ export class SolarSystem {
       star.x = THREE.Math.randFloatSpread(2000);
       star.y = THREE.Math.randFloatSpread(2000);
       star.z = THREE.Math.randFloatSpread(2000);
-
       geometry.vertices.push(star);
     }
 
@@ -73,11 +73,11 @@ export class SolarSystem {
   _keyEvent() {
     const keyPress = (e) => {
       if (e.code === "KeyA") {
-        this._activeObjectIndex =
-          (this._activeObjectIndex + 1) % this.objs.length;
-        const { x, y } = this.objs[this._activeObjectIndex].obj.position;
-        this.camera.up.set(0, 0, 1);
-        this.camera.lookAt(x, y, 0);
+        this.change(this._activeObjectIndex + 1);
+      } else if (e.code === "KeyZ") {
+        this.distance += 0.5;
+      } else if (e.code === "KeyX") {
+        this.distance -= 0.5;
       }
     };
     document.addEventListener("keypress", keyPress);
@@ -95,7 +95,6 @@ export class SolarSystem {
     const mouseMove = (e) => {
       this.t += e.movementX / 60;
       const { x, y } = this.objs[this._activeObjectIndex].obj.position;
-
       this.camera.position.set(
         x + Math.sin(this.t) * distance,
         y + Math.cos(this.t) * distance,
@@ -107,6 +106,22 @@ export class SolarSystem {
       document.addEventListener("mouseup", mouseUp);
     };
     document.addEventListener("mousedown", mouseDown);
+    window.addEventListener("mousewheel", (e) => {
+      if (e.deltaY > 0) {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.timer = null;
+          this.change(this._activeObjectIndex + 1);
+        }, 100);
+      } else if (e.deltaY < 0) {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.timer = null;
+          if (this._activeObjectIndex === 0) this.change(this.objs.length - 1);
+          else this.change(this._activeObjectIndex - 1);
+        }, 100);
+      }
+    });
   }
   get domElement() {
     return this.renderer.domElement;
@@ -115,6 +130,12 @@ export class SolarSystem {
     if (this.targetObj === null) this.targetObj = obj;
     this.scene.add(obj.obj);
     this.objs.push(obj);
+  }
+  change(index) {
+    this._activeObjectIndex = index % this.objs.length;
+    const { x, y } = this.objs[this._activeObjectIndex].obj.position;
+    this.camera.up.set(0, 0, 1);
+    this.camera.lookAt(x, y, 0);
   }
   render() {
     for (let obj of this.objs) {
@@ -148,7 +169,7 @@ export class Planet extends Obj {
     const geometry = new THREE.SphereGeometry(0.5, 100, 100);
     const loader = new THREE.TextureLoader();
     const material = new THREE.MeshLambertMaterial({
-      map: loader.load("./assets/earth.jpg"),
+      map: loader.load("./../assets/earth.jpg"),
     });
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.z = 0;
