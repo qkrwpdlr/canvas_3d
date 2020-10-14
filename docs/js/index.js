@@ -52287,7 +52287,7 @@ class Planet extends Obj {
     const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](0.5, 100, 100);
     const loader = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["TextureLoader"]();
     const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({
-      map: loader.load("./../assets/earth.jpg"),
+      map: loader.load("./assets/earth.jpg"),
     });
     this.obj = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Mesh"](geometry, material);
     this.obj.position.z = 0;
