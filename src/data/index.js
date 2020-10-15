@@ -8,7 +8,9 @@ const initData = () => {
         dummy.orbitalSpeed,
         dummy.rotationSpeed,
         dummy.distance,
-        dummy.radius
+        dummy.radius,
+        dummy.planetName,
+        dummy.cycle
       )
     );
   return temp;

@@ -28,12 +28,12 @@ export class SolarSystem {
   _setBackground() {
     const backlight = new THREE.AmbientLight(0x404040); // soft white light
     this.scene.add(backlight);
-    const light = new THREE.PointLight(0xffffff, 5, 100);
+    const light = new THREE.PointLight(0xffffff, 5, 100000);
     light.position.set(0, 0, 0);
     this.scene.add(light);
     const geometry = new THREE.Geometry();
 
-    for (let i = 0; i < 100000; i++) {
+    for (let i = 0; i < 10000; i++) {
       const star = new THREE.Vector3();
       star.x = THREE.Math.randFloatSpread(2000);
       star.y = THREE.Math.randFloatSpread(2000);
@@ -164,12 +164,12 @@ export class Obj {
   render() {}
 }
 export class Planet extends Obj {
-  constructor({ distance, speed }) {
+  constructor({ distance, speed, size, planetName }) {
     super();
-    const geometry = new THREE.SphereGeometry(0.5, 100, 100);
+    const geometry = new THREE.SphereGeometry(size, 100, 100);
     const loader = new THREE.TextureLoader();
     const material = new THREE.MeshLambertMaterial({
-      map: loader.load("./assets/earth.jpg"),
+      map: loader.load(`./assets/${planetName}.jpg`),
     });
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.z = 0;

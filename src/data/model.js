@@ -7,13 +7,17 @@ export class Planet {
     // 태양과의 거리
     distance,
     // 행성의 지름
-    radius
+    radius,
+    planetName,
+    cycle
   ) {
     this.orbitalSpeed = orbitalSpeed;
     this.rotationSpeed = rotationSpeed;
     this.distance = distance;
     this.radius = radius;
     this.id = uuidv4();
+    this.planetName = planetName;
+    this.cycle = cycle;
   }
 }
 

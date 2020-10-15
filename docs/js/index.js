@@ -52146,12 +52146,12 @@ class SolarSystem {
   _setBackground() {
     const backlight = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["AmbientLight"](0x404040); // soft white light
     this.scene.add(backlight);
-    const light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xffffff, 5, 100);
+    const light = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["PointLight"](0xffffff, 5, 100000);
     light.position.set(0, 0, 0);
     this.scene.add(light);
     const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Geometry"]();
 
-    for (let i = 0; i < 100000; i++) {
+    for (let i = 0; i < 10000; i++) {
       const star = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Vector3"]();
       star.x = three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Math"].randFloatSpread(2000);
       star.y = three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Math"].randFloatSpread(2000);
@@ -52282,12 +52282,12 @@ class Obj {
   render() {}
 }
 class Planet extends Obj {
-  constructor({ distance, speed }) {
+  constructor({ distance, speed, size, planetName }) {
     super();
-    const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](0.5, 100, 100);
+    const geometry = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["SphereGeometry"](size, 100, 100);
     const loader = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["TextureLoader"]();
     const material = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["MeshLambertMaterial"]({
-      map: loader.load("./assets/earth.jpg"),
+      map: loader.load(`./assets/${planetName}.jpg`),
     });
     this.obj = new three_build_three_module__WEBPACK_IMPORTED_MODULE_0__["Mesh"](geometry, material);
     this.obj.position.z = 0;
@@ -52332,22 +52332,52 @@ __webpack_require__.r(__webpack_exports__);
   {
     orbitalSpeed: 0.1,
     rotationSpeed: 1,
-    distance: 1,
-    radius: 1,
-  },
-  {
-    orbitalSpeed: 0.2,
-    rotationSpeed: 1,
-    distance: 2,
-    radius: 1,
+    distance: 0.4,
+    radius: 2440,
+    planetName: "mercury",
+    cycle: 88,
   },
   {
     orbitalSpeed: 0.1,
     rotationSpeed: 1,
-    distance: 3,
-    radius: 1,
+    distance: 0.7,
+    radius: 6052,
+    planetName: "venus",
+    cycle: 225,
   },
- ]);
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 1,
+    radius: 6378,
+    planetName: "earth",
+    cycle: 365,
+  },
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 1.5,
+    radius: 3390,
+    planetName: "mars",
+    cycle: 687,
+  },
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 5.2,
+    radius: 69911,
+    planetName: "jupiter",
+    cycle: 4343.5,
+  },
+  {
+    orbitalSpeed: 0.1,
+    rotationSpeed: 1,
+    distance: 9.5,
+    radius: 58232,
+    planetName: "saturn",
+    cycle: 10767.5,
+  },
+]);
 
 
 /***/ }),
@@ -52374,7 +52404,9 @@ const initData = () => {
         dummy.orbitalSpeed,
         dummy.rotationSpeed,
         dummy.distance,
-        dummy.radius
+        dummy.radius,
+        dummy.planetName,
+        dummy.cycle
       )
     );
   return temp;
@@ -52404,13 +52436,17 @@ class Planet {
     // 태양과의 거리
     distance,
     // 행성의 지름
-    radius
+    radius,
+    planetName,
+    cycle
   ) {
     this.orbitalSpeed = orbitalSpeed;
     this.rotationSpeed = rotationSpeed;
     this.distance = distance;
     this.radius = radius;
     this.id = uuidv4();
+    this.planetName = planetName;
+    this.cycle = cycle;
   }
 }
 
@@ -52442,9 +52478,12 @@ const main = () => {
   const system = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["SolarSystem"](window.innerWidth, window.innerHeight);
   document.body.appendChild(system.domElement);
   for (let data of _data__WEBPACK_IMPORTED_MODULE_1__["datas"]) {
+    // if(data.radius > 10000) data.radius = 10000
     const obj = new _3d_js__WEBPACK_IMPORTED_MODULE_0__["Planet"]({
-      distance: data.distance * 3,
-      speed: data.orbitalSpeed * 0.05,
+      distance: data.distance * 40,
+      speed: 3 / data.cycle,
+      size: data.radius / 12000,
+      planetName: data.planetName,
     });
     system.add(obj);
   }
